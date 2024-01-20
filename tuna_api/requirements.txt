@@ -2,3 +2,4 @@ pyrebase
 fastapi
 uvicorn[standard]
 openai
+urllib3
