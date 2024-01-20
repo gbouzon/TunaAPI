@@ -1,4 +1,3 @@
-pyrebase4.7.1
+pyrebase
 fastapi
-dotenv
 uvicorn[standard]
