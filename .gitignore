@@ -1,1 +1,5 @@
 .env
+tuna_api/Lib
+tuna_api/Scripts
+tuna_api/Include
+tuna_api/pyvenv.cfg
