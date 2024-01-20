@@ -1,0 +1,4 @@
+pyrebase4.7.1
+fastapi
+dotenv
+uvicorn[standard]
