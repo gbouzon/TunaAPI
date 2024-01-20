@@ -1,3 +1,4 @@
 pyrebase
 fastapi
 uvicorn[standard]
+openai
