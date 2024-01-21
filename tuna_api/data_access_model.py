@@ -70,11 +70,10 @@ class DataAccessModel:
         print("Allergies: " + str(userData['allergies']))
         print("Preferences: " + str(userData['preferences']))
 
-    ## Favourite Recipe Operations
-    def formatFavouriteRecipeJson(self, recipe):
+    # Recipe Operations
+    def formatRecipeJson(self, recipe):
         return {
             'id': recipe['id'],
-            'uid': recipe['uid'],
             'title': recipe['title'],
             'prep_time': recipe['prep_time'],
             'ingredients': recipe['ingredients'],
@@ -82,49 +81,45 @@ class DataAccessModel:
             'picture_url': recipe['picture_url'],
         }
     
-    def favouriteRecipeIsNull(self, uid, id):
-        print(uid)
-        print(id)
-        print(self.db.child("Favourites").child(id).child("uid").get().val())
-        return self.db.child("Favourites").child(id).order_by_child("uid").equal_to(uid).get().val() == None
-
-    def createFavouriteRecipe(self, id, uid, title, prep_time, ingredients, instructions, picture_url):
+    def recipeIsNull(self, id):
+        return self.db.child("Recipes").child(id).get().val() == None
+    
+    def createRecipe(self, id, title, prep_time, ingredients, instructions, picture_url):
         recipe = {
             'id': id,
-            'uid': uid,
             'title': title,
             'prep_time': prep_time,
             'ingredients': ingredients,
             'instructions': instructions,
             'picture_url': picture_url,
         }
-        if self.favouriteRecipeIsNull(uid, id):
-            self.db.child("Favourites").child(id).set(self.formatFavouriteRecipeJson(recipe))
+        if self.recipeIsNull(id):
+            self.db.child("Recipes").child(id).set(self.formatRecipeJson(recipe))
         else:
-            self.updateFavouriteRecipe(uid, self.formatFavouriteRecipeJson(recipe))
+            self.updateRecipe(self.formatRecipeJson(recipe))
 
-    def getFavouriteRecipeInfo(self, uid, id):
-        if self.favouriteRecipeIsNull(uid, id) is False:
-            return self.db.child("Favourites").child(id).order_by_child("uid").equal_to(uid).get().val()
+    def getRecipeInfo(self, id):
+        if self.recipeIsNull(id) is False:
+            return self.db.child("Recipes").child(id).get().val()
         else:
             print("Invalid user. Please enter a valid user identification key.")
-
-    def getAllFavouriteRecipeInfo(self, uid):
-        return self.db.child("Favourites").order_by_child("uid").equal_to(uid).get().val()
     
-    def updateFavouriteRecipe(self, uid, recipe_data):
-        if self.favouriteRecipeIsNull(uid, id) is False:
-            self.db.child("Favourites").child(id).update(recipe_data)
+    def getAllRecipeInfo(self):
+        return self.db.child("Recipes").get().val()
+    
+    def updateRecipe(self, recipe_data):
+        if self.recipeIsNull(id) is False:
+            self.db.child("Recipes").child(id).update(recipe_data)
         else:
             print("Invalid user. Please enter a valid user identification key.")
 
-    def deleteFavouriteRecipe(self, uid, id):
-        if self.favouriteRecipeIsNull(uid, id) is False:
-            self.db.child("Favourites").child(id).remove()
+    def deleteRecipe(self, id):
+        if self.recipeIsNull(id) is False:
+            self.db.child("Recipes").child(id).remove()
         else:
             print("Invalid user. No user was deleted.")
 
-    def parseFavouriteRecipeData(self, recipeData):
+    def parseRecipeData(self, recipeData):
         for recipe in recipeData:
             print("ID: " + recipe['id'])
             print("Title: " + recipe['title'])
@@ -132,6 +127,39 @@ class DataAccessModel:
             print("Ingredients: " + str(recipe['ingredients']))
             print("Instructions: " + str(recipe['instructions']))
             print("Picture URL: " + recipe['picture_url'])
+    
+    def favouriteRecipeIsNull(self, uid, id):
+        for recipe in self.db.child("Favourites").get().val():
+            if recipe['uid'] == uid and recipe['rid'] == id:
+                return False
+        return True
+
+    def createFavouriteRecipe(self, uid, rid,):
+        recipe = {
+            'uid': uid,
+            'rid': rid,
+        }
+        if self.favouriteRecipeIsNull(uid, rid):
+            self.db.child("Favourites").child(rid).set(self.formatFavouriteRecipeJson(recipe))
+        else:
+            self.updateFavouriteRecipe(uid, self.formatFavouriteRecipeJson(recipe))
+
+    def getAllFavouriteRecipeInfo(self, uid):
+        return self.db.child("Favourites").child(uid).get().val()
+    
+    def deleteFavouriteRecipe(self, uid, rid):
+        if self.favouriteRecipeIsNull(uid, rid) is False:
+            favs = self.db.child("Favourites").child(uid).get().val()
+            for fav in favs:
+                if fav['rid'] == rid:
+                    self.db.child("Favourites").child(uid).child(fav['rid']).remove()
+        else:
+            print("Invalid user. No user was deleted.")
+
+    def parseFavouriteRecipeData(self, favouriteRecipeData):
+        for recipe in favouriteRecipeData:
+            print("UID: " + recipe['uid'])
+            print("RID: " + recipe['rid'])
 
     ## Shopping list Operations
         
@@ -174,8 +202,3 @@ class DataAccessModel:
 
     def parseShoppingListData(self, shopping_list_data):
         print("Ingredients: " + str(shopping_list_data['ingredients']))
-        
-dam = DataAccessModel()
-#dam.parseUserData(dam.getUserInfo("user1"))
-print(dam.getFavouriteRecipeInfo("user1", 1))
-#dam.parseShoppingListData(dam.getShoppingListInfo("user1"))
